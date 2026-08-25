@@ -1,36 +1,87 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
 
-  <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="konekta">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
   <title>konekta</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    @media (min-width: 560px) {
+      html {
+        height: 100%;
+        background: radial-gradient(circle at 50% 20%, #24365a 0%, #0c1220 70%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      body {
+        position: relative;
+        width: 390px;
+        height: 844px;
+        max-height: 92vh;
+        margin: 0;
+        border-radius: 48px;
+        overflow: hidden;
+        background: #000;
+        box-shadow:
+          0 0 0 3px #050505,
+          0 0 0 14px #1c1c1e,
+          0 0 0 15px #3a3a3c,
+          0 30px 70px rgba(0, 0, 0, 0.55),
+          0 10px 25px rgba(0, 0, 0, 0.35);
+      }
+
+      body::before {
+        content: "";
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 110px;
+        height: 30px;
+        background: #050505;
+        border-radius: 18px;
+        z-index: 9999;
+        pointer-events: none;
+      }
+
+      body::after {
+        content: "";
+        position: absolute;
+        bottom: 9px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 128px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.55);
+        border-radius: 3px;
+        z-index: 9999;
+        pointer-events: none;
+      }
+    }
+
+    @media (max-width: 559px) {
+      html, body {
+        margin: 0;
+        height: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
