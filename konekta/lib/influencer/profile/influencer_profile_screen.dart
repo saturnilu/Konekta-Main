@@ -161,7 +161,7 @@ class _InfluencerProfileScreenState extends State<InfluencerProfileScreen> {
     try {
       await scope.run(() async {
         final bytes = await picked!.readAsBytes();
-        return scope.api.uploadFile('/profile/avatar', fieldName: 'avatar', bytes: bytes, filename: picked.name);
+        return scope.api.uploadFile('/profile/avatar', fieldName: 'avatar', bytes: bytes, filename: picked!.name);
       });
       await _load();
       if (!mounted) return;

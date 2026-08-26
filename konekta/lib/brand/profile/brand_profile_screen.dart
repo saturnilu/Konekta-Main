@@ -87,7 +87,7 @@ class _BrandProfileScreenState extends State<BrandProfileScreen> {
       final res = await scope.run(
         () async {
           final bytes = await picked!.readAsBytes();
-          return scope.api.uploadFile('/profile/avatar', fieldName: 'avatar', bytes: bytes, filename: picked.name);
+          return scope.api.uploadFile('/profile/avatar', fieldName: 'avatar', bytes: bytes, filename: picked!.name);
         },
       );
       final url = (res as Map)['avatar_url']?.toString();
