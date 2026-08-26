@@ -46,41 +46,54 @@
         border-radius: 36px;
         overflow: hidden;
         background: #000;
+        display: flex;
+        flex-direction: column;
       }
 
-      .phone-frame iframe {
-        display: block;
-        width: 100%;
-        height: 100%;
-        border: none;
+      .status-bar-strip {
+        position: relative;
+        flex-shrink: 0;
+        height: 40px;
+        background: #000;
       }
 
-      .phone-frame::before {
+      .status-bar-strip::before {
         content: "";
         position: absolute;
-        top: 26px;
+        top: 8px;
         left: 50%;
         transform: translateX(-50%);
         width: 110px;
-        height: 30px;
+        height: 24px;
         background: #050505;
-        border-radius: 18px;
-        z-index: 10;
-        pointer-events: none;
+        border-radius: 16px;
       }
 
-      .phone-frame::after {
+      .home-bar-strip {
+        position: relative;
+        flex-shrink: 0;
+        height: 26px;
+        background: #000;
+      }
+
+      .home-bar-strip::before {
         content: "";
         position: absolute;
-        bottom: 22px;
+        top: 10px;
         left: 50%;
         transform: translateX(-50%);
         width: 128px;
         height: 4px;
         background: rgba(255, 255, 255, 0.55);
         border-radius: 3px;
-        z-index: 10;
-        pointer-events: none;
+      }
+
+      .phone-frame iframe {
+        display: block;
+        width: 100%;
+        flex: 1 1 auto;
+        min-height: 0;
+        border: none;
       }
     }
 
@@ -96,16 +109,19 @@
         width: 100%;
         height: 100%;
         border-radius: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .status-bar-strip,
+      .home-bar-strip {
+        display: none;
       }
       .phone-frame iframe {
         display: block;
         width: 100%;
-        height: 100%;
+        flex: 1 1 auto;
+        min-height: 0;
         border: none;
-      }
-      .phone-frame::before,
-      .phone-frame::after {
-        display: none;
       }
     }
   </style>
@@ -113,7 +129,9 @@
 <body>
   <div class="phone-frame">
     <div class="phone-screen">
+      <div class="status-bar-strip"></div>
       <iframe src="app.html" title="Konekta"></iframe>
+      <div class="home-bar-strip"></div>
     </div>
   </div>
 </body>
