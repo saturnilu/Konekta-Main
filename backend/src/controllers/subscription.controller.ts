@@ -19,10 +19,6 @@ export const subscriptionController = {
     } catch (e) { next(e); }
   },
 
-  async mine(req: Request, res: Response, next: NextFunction) {
-    return subscriptionController.me(req, res, next);
-  },
-
   async subscribe(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.user) throw new ApiError(401, 'Unauthorized');
