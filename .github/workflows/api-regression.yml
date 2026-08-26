@@ -1,0 +1,101 @@
+name: API Regression Suite
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mariadb:10.11
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: konekta
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Load schema and seed data
+        run: |
+          mysql -h 127.0.0.1 -u root konekta < database/schema.sql
+          mysql -h 127.0.0.1 -u root konekta < database/seed.sql || true
+
+      - name: Start backend
+        working-directory: backend
+        env:
+          PORT: 4000
+          NODE_ENV: development
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USER: root
+          DB_PASSWORD: ''
+          DB_NAME: konekta
+          JWT_SECRET: ci-test-secret-key
+          ALLOWED_ORIGINS: '*'
+        run: |
+          nohup npx ts-node-dev --respawn --transpile-only src/server.ts > server.log 2>&1 &
+          npx wait-on http://localhost:4000/health --timeout 30000
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run API regression suite
+        working-directory: postman
+        run: |
+          newman run Konekta_QA_Regression_Suite.postman_collection.json \
+            -e Konekta_Local.postman_environment.json \
+            --folder "01 - Auth" \
+            --folder "02 - Google OAuth" \
+            --folder "03 - Profile" \
+            --folder "04 - Discovery" \
+            --folder "05 - Offers" \
+            --folder "06 - Video (known bug BUG-001)" \
+            --folder "07 - Chat" \
+            --folder "08 - Notifications" \
+            --folder "09 - Dashboard" \
+            --folder "10 - Analytics" \
+            --folder "11 - Subscriptions" \
+            --folder "12 - Social" \
+            --folder "13 - Withdrawals" \
+            --folder "14 - Payment Methods" \
+            --folder "15 - System" \
+            --reporters cli,junit \
+            --reporter-junit-export newman-results.xml
+        # Note: folder "16 - Rate Limiting" is intentionally excluded from CI.
+        # It exhausts the shared /auth/* rate-limit budget (20 req / 15 min)
+        # and would cause unrelated auth tests to fail with 429 if run together.
+        # Run it manually / in isolation when specifically testing the limiter.
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-results
+          path: postman/newman-results.xml
+
+      - name: Print backend log on failure
+        if: failure()
+        working-directory: backend
+        run: cat server.log

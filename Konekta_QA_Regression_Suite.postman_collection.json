@@ -1,0 +1,3986 @@
+{
+  "info": {
+    "name": "Konekta API \u2014 QA Regression Suite",
+    "description": "Automated regression suite for the Konekta backend (Express + TypeScript + MySQL). Built from Konekta_QA_Test_Case_Matrix.xlsx and Konekta_QA_Bug_Report.md. Requests tagged '[BUG-XXX regression]' intentionally assert the CORRECT expected behaviour and will fail until the corresponding bug is fixed \u2014 they exist to flip green automatically once a fix ships, without needing the suite rewritten.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - Auth",
+      "item": [
+        {
+          "name": "Register - Influencer (valid)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Newman Influencer\", \"email\": \"{{$randomEmail}}\", \"password\": \"password123\", \"role\": \"influencer\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Returns token and user', () => { const d = pm.response.json().data; pm.expect(d.token).to.be.a('string'); pm.expect(d.user.role).to.eql('influencer'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register - Brand (valid)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Newman Brand\", \"email\": \"{{$randomEmail}}\", \"password\": \"password123\", \"role\": \"brand\", \"brand_name\": \"Newman Test Brand\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Role is brand', () => pm.expect(pm.response.json().data.user.role).to.eql('brand'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register - Duplicate email (negative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Dup\", \"email\": \"ava@konekta-mobile.test\", \"password\": \"password123\", \"role\": \"influencer\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Clear error message', () => pm.expect(pm.response.json().message).to.include('already registered'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register - Invalid email format (negative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test\", \"email\": \"not-an-email\", \"password\": \"password123\", \"role\": \"influencer\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register - Password below min length (boundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test\", \"email\": \"{{$randomEmail}}\", \"password\": \"12345\", \"role\": \"influencer\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register - Invalid role enum (negative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test\", \"email\": \"{{$randomEmail}}\", \"password\": \"password123\", \"role\": \"admin\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Influencer1 (Ava) [captures token]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"ava@konekta-mobile.test\", \"password\": \"password123\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json().data;",
+                  "pm.environment.set('token_influencer1', d.token);",
+                  "pm.environment.set('influencer1_id', d.user.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Influencer2 (Leo) [captures token]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"leo@konekta-mobile.test\", \"password\": \"password123\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json().data;",
+                  "pm.environment.set('token_influencer2', d.token);",
+                  "pm.environment.set('influencer2_id', d.user.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Brand1 (Kopi Susu) [captures token]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"brand1@konekta-mobile.test\", \"password\": \"password123\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json().data;",
+                  "pm.environment.set('token_brand1', d.token);",
+                  "pm.environment.set('brand1_id', d.user.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Brand2 (Aula Skincare) [captures token]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"brand2@konekta-mobile.test\", \"password\": \"password123\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json().data;",
+                  "pm.environment.set('token_brand2', d.token);",
+                  "pm.environment.set('brand2_id', d.user.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Wrong password (negative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"ava@konekta-mobile.test\", \"password\": \"wrongpass123\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Generic message, no user enumeration', () => pm.expect(pm.response.json().message).to.eql('Invalid email or password'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Non-existent email (negative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"doesnotexist_{{$randomInt}}@test.com\", \"password\": \"password123\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Same generic message as wrong-password case', () => pm.expect(pm.response.json().message).to.eql('Invalid email or password'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Missing password field (negative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"ava@konekta-mobile.test\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Forgot Password - Existing email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"ava@konekta-mobile.test\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Forgot Password - Non-existent email (no enumeration)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"definitely_not_registered_{{$randomInt}}@test.com\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Same generic message regardless of existence', () => pm.expect(pm.response.json().message).to.include('If the email exists'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reset Password - Token below min length (boundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"token\": \"short\", \"password\": \"newpass123\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Change Password - Wrong current password (negative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"current_password\": \"totallywrongpass\", \"new_password\": \"newpass456\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Change Password - No auth header (negative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"current_password\": \"x\", \"new_password\": \"newpass456\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "02 - Google OAuth",
+      "item": [
+        {
+          "name": "Google - Redirect entrypoint",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "google"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Redirects or rate-limited', () => pm.expect([302, 429]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Google - Callback without code (negative)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/google/callback",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "google",
+                "callback"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Handled gracefully, not a 500', () => pm.expect(pm.response.code).to.be.below(500));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Google - Mobile invalid id_token (negative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/google/mobile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "google",
+                "mobile"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id_token\": \"garbage_invalid_token\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rejected without crashing', () => pm.expect(pm.response.code).to.be.oneOf([400, 401, 429]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Google - idtoken malformed payload (negative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/google/idtoken",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "google",
+                "idtoken"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rejected without crashing', () => pm.expect(pm.response.code).to.be.oneOf([400, 401, 429]));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "03 - Profile",
+      "item": [
+        {
+          "name": "Get own profile (Ava)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/profile/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "profile",
+                "me"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Correct own id returned', () => pm.expect(pm.response.json().data.user.id).to.eql(Number(pm.environment.get('influencer1_id'))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get profile without token (negative)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/profile/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "profile",
+                "me"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update own profile - valid fields",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/profile/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "profile",
+                "me"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bio\": \"Updated via Newman automated test\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mass-assignment attempt - foreign id in body (should be ignored)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/profile/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "profile",
+                "me"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id\": {{influencer2_id}}, \"bio\": \"attempted overwrite\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Update still scopes to caller, not injected id', () => pm.expect(pm.response.json().data.user.id).to.eql(Number(pm.environment.get('influencer1_id'))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Influencer calls brand-only update (negative, role gate)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/profile/brand",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "profile",
+                "brand"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"brand_name\": \"Should not be allowed\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add valid social media handle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/profile/influencer/social-media",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "profile",
+                "influencer",
+                "social-media"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"platform\": \"youtube\", \"handle\": \"@newmanqa\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Avatar upload without auth (negative)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/profile/avatar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "profile",
+                "avatar"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "04 - Discovery",
+      "item": [
+        {
+          "name": "List influencers (public, paginated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/influencers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "influencers"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List brands (public, paginated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/brands",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "brands"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get influencer by valid id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/influencers/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "influencers",
+                "1"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get influencer - non-existent id (negative)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/influencers/999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "influencers",
+                "999999"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get influencer - non-numeric id (boundary)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/influencers/abc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "influencers",
+                "abc"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Handled gracefully (400), not a 500', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get brand - non-existent id (negative)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/brands/999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "brands",
+                "999999"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "05 - Offers",
+      "item": [
+        {
+          "name": "List public offers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/offers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "role=brand query WITHOUT auth (no data leak)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/offers?role=brand",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers?role=brand"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('No data leaked to anonymous caller', () => pm.expect(pm.response.json().data).to.be.an('array').that.is.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Brand lists own offers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers/mine",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers",
+                "mine"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Influencer lists own applications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers/applications/mine",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers",
+                "applications",
+                "mine"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Influencer attempts to CREATE an offer (role gate)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Sneaky Influencer Offer\", \"budget\": 100000}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Brand creates valid offer [captures offer_id]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Newman QA Test Offer\", \"budget\": 250000, \"brief\": \"Created by automated test\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('offer_id', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create offer - negative budget (boundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Bad Budget\", \"budget\": -500}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create offer - title 1 char, below min (boundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"A\", \"budget\": 100000}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create offer - title 160 chars, max boundary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\", \"budget\": 100000}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201 at boundary', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create offer - title 161 chars, over max (boundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\", \"budget\": 100000}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400 over boundary', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create offer - XSS payload in brief (security)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"XSS Test\", \"budget\": 100000, \"brief\": \"<img src=x onerror=alert(1)>\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Payload stored literally, not transformed/executed', () => pm.expect(pm.response.json().data.brief).to.include('<img'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get offer detail (public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/offers/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers",
+                "1"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "IDOR - Brand2 edits Brand1's offer (security)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers",
+                "1"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Hacked by Brand2\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));",
+                  "pm.test('Correct denial message', () => pm.expect(pm.response.json().message).to.eql('Not your offer'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "IDOR - Brand2 views Brand1's applicants (security)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers/1/applicants",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers",
+                "1",
+                "applicants"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Influencer2 applies to open offer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers/{{offer_id}}/apply",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers",
+                "{{offer_id}}",
+                "apply"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"message\": \"Newman applying\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Influencer2 applies AGAIN - duplicate (negative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers/{{offer_id}}/apply",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers",
+                "{{offer_id}}",
+                "apply"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"message\": \"second try\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 409 duplicate', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Brand attempts to apply to an offer (role gate)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers/{{offer_id}}/apply",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers",
+                "{{offer_id}}",
+                "apply"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"message\": \"brand trying to apply\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid applicant status enum (negative)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers/{{offer_id}}/applicants/1/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers",
+                "{{offer_id}}",
+                "applicants",
+                "1",
+                "status"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"maybe_later\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Offer progress - empty milestone (boundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers/6/progress",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers",
+                "6",
+                "progress"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"milestone\": \"\", \"status\": \"in_progress\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "06 - Video (known bug BUG-001)",
+      "item": [
+        {
+          "name": "[BUG-001 regression] GET /videos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/videos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "videos"
+              ]
+            },
+            "description": "Known bug: BUG-001. Video routes are never mounted in app.ts. This test documents the expected behaviour and will pass once the fix ships."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// This test intentionally asserts CORRECT behaviour.",
+                  "// It will FAIL until BUG-001 (video routes not mounted) is fixed.",
+                  "pm.test('Video routes should be reachable (BUG-001)', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[BUG-001 regression] POST /videos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/videos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "videos"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"video_url\": \"https://tiktok.com/@test/video/123\", \"platform\": \"tiktok\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Video submission should work (BUG-001)', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[BUG-001 regression] POST /videos/:id/refresh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/videos/1/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "videos",
+                "1",
+                "refresh"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Refresh should work (BUG-001)', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[BUG-001 regression] GET /videos/brand/:influencerId",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/videos/brand/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "videos",
+                "brand",
+                "1"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Brand video list should work (BUG-001)', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[BUG-001 regression] POST /videos/brand/:influencerId/pay",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/videos/brand/1/pay",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "videos",
+                "brand",
+                "1",
+                "pay"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"amount\": 50000}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Payment endpoint should work (BUG-001)', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "All requests here are expected to fail until BUG-001 (video routes not mounted) is fixed."
+    },
+    {
+      "name": "07 - Chat",
+      "item": [
+        {
+          "name": "List own conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/conversations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "conversations"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ensure conversation (idempotent) [captures conversation_id]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/conversations/ensure",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "conversations",
+                "ensure"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"brand_user_id\": {{brand1_id}}, \"influencer_user_id\": {{influencer1_id}}}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('conversation_id', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Send valid message in own conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/conversations/{{conversation_id}}/messages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "conversations",
+                "{{conversation_id}}",
+                "messages"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"body\": \"Hello from Newman\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "IDOR - non-member reads conversation messages (security)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/conversations/{{conversation_id}}/messages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "conversations",
+                "{{conversation_id}}",
+                "messages"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "IDOR - non-member sends message into conversation (security)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/conversations/{{conversation_id}}/messages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "conversations",
+                "{{conversation_id}}",
+                "messages"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"body\": \"intrusion attempt\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "XSS payload as message body (security)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/conversations/{{conversation_id}}/messages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "conversations",
+                "{{conversation_id}}",
+                "messages"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"body\": \"<script>alert(1)</script>\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Stored literally, not transformed', () => pm.expect(pm.response.json().data.body).to.include('<script>'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Empty message body (boundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/conversations/{{conversation_id}}/messages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "conversations",
+                "{{conversation_id}}",
+                "messages"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"body\": \"\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "08 - Notifications",
+      "item": [
+        {
+          "name": "List own notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get unread count",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/unread-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "unread-count"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mark all as read",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/read-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "read-all"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[BUG-002 regression] IDOR - mark another user's notification as read",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/1/read",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "1",
+                "read"
+              ]
+            },
+            "description": "Known bug: BUG-002. The endpoint returns 200 'Marked as read' even when the notification belongs to another user, even though the underlying update is correctly scoped and affects 0 rows. This test documents the expected behaviour."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Notification id 1 belongs to influencer1 (Ava), not influencer2 (Leo).",
+                  "// Correct behaviour is 404. Currently returns 200 due to BUG-002.",
+                  "pm.test('Should reject with 404 for non-owned resource (BUG-002)', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "09 - Dashboard",
+      "item": [
+        {
+          "name": "Get role-appropriate overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/overview",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "overview"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Influencer calls brand-only dashboard (role gate)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/brand",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "brand"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Brand calls influencer-only dashboard (role gate)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/influencer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "influencer"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Brand transactions - scoped to self",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/brand/transactions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "brand",
+                "transactions"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "10 - Analytics",
+      "item": [
+        {
+          "name": "Influencer calls brand analytics (role gate)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analytics/brand",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "brand"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Brand calls influencer analytics (role gate)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analytics/influencer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "influencer"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Influencer gets own analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analytics/influencer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "influencer"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "11 - Subscriptions",
+      "item": [
+        {
+          "name": "List available plans (public, optionalAuth)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/subscriptions/plans",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "subscriptions",
+                "plans"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 without auth', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get own current subscription",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/subscriptions/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "subscriptions",
+                "me"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Subscribe to non-existent plan (negative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/subscriptions/subscribe",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "subscriptions",
+                "subscribe"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"plan_id\": 99999}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "12 - Social",
+      "item": [
+        {
+          "name": "List own linked social accounts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/social/mine",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "social",
+                "mine"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add social account - empty handle (boundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/social/mine",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "social",
+                "mine"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"platform\": \"tiktok\", \"handle\": \"\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add valid social account [captures social_id]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/social/mine",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "social",
+                "mine"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"platform\": \"twitter\", \"handle\": \"@newmanqa_twitter\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('social_id', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[BUG-003 regression] IDOR - delete another user's social account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/social/mine/{{social_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "social",
+                "mine",
+                "{{social_id}}"
+              ]
+            },
+            "description": "Known bug: BUG-003. The endpoint returns 200 'deleted:true' even when the social account belongs to another user. The SQL delete is correctly scoped and affects 0 rows, but the controller never checks affected-rows before reporting success. Same pattern as BUG-002."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// This social account belongs to influencer1 (Ava), not influencer2 (Leo).",
+                  "// Correct behaviour is 404. Currently returns 200 'deleted:true' due to BUG-003.",
+                  "pm.test('Should reject with 404 for non-owned resource (BUG-003)', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "13 - Withdrawals",
+      "item": [
+        {
+          "name": "Get own withdrawable balance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/withdrawals/balance",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "withdrawals",
+                "balance"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List own withdrawal history",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/withdrawals/mine",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "withdrawals",
+                "mine"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Request exceeding available balance (financial integrity)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/withdrawals",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "withdrawals"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"amount\": 999999999, \"bank_name\": \"BCA\", \"account_number\": \"1234567890\", \"account_name\": \"Ava Creator\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400, correctly rejected', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Request below minimum withdrawal (boundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/withdrawals",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "withdrawals"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"amount\": 10000, \"bank_name\": \"BCA\", \"account_number\": \"1234567890\", \"account_name\": \"Ava Creator\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Request zero amount (boundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/withdrawals",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "withdrawals"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"amount\": 0, \"bank_name\": \"BCA\", \"account_number\": \"1234567890\", \"account_name\": \"Ava Creator\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Request negative amount (boundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_influencer1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/withdrawals",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "withdrawals"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"amount\": -500, \"bank_name\": \"BCA\", \"account_number\": \"1234567890\", \"account_name\": \"Ava Creator\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Call balance without auth (negative)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/withdrawals/balance",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "withdrawals",
+                "balance"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "14 - Payment Methods",
+      "item": [
+        {
+          "name": "List own saved payment methods",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payment-methods/mine",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "payment-methods",
+                "mine"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add valid payment method [captures payment_method_id]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payment-methods",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "payment-methods"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"type\": \"bank_transfer\", \"label\": \"Newman Test Bank\", \"provider\": \"BCA\", \"last4\": \"4321\", \"is_default\": true}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('payment_method_id', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add payment method - invalid last4 format (negative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payment-methods",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "payment-methods"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"type\": \"bank_transfer\", \"label\": \"Bad Format\", \"provider\": \"BCA\", \"last4\": \"abcd\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "IDOR - delete another brand's payment method (security)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payment-methods/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "payment-methods",
+                "1"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404, correctly scoped', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "IDOR - set another brand's payment method as default (security)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_brand2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payment-methods/1/default",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "payment-methods",
+                "1",
+                "default"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404, correctly scoped', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "15 - System",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Undefined route (negative)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/this-does-not-exist",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "this-does-not-exist"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Forged JWT with wrong secret (security)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{forged_jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/profile/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "profile",
+                "me"
+              ]
+            },
+            "description": "forged_jwt env variable should be pre-populated with a token signed with an incorrect secret."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[BUG-004 regression] Malformed JSON body",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Known bug: BUG-004. Body is deliberately malformed JSON syntax. Targets /health (not /auth/*) to avoid the shared auth rate limiter.",
+            "body": {
+              "mode": "raw",
+              "raw": "{bad json"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Uses /health instead of /auth/login on purpose, so this check",
+                  "// is not affected by the /auth/* rate limiter shared with other tests.",
+                  "// Correct behaviour is 400 Bad Request for malformed client JSON.",
+                  "// Currently returns 500 due to BUG-004 (errorHandler doesn't catch SyntaxError).",
+                  "pm.test('Should return 400, not 500 (BUG-004)', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "16 - Rate Limiting (run in isolation)",
+      "item": [
+        {
+          "name": "Rate limit probe (run this folder alone, 21+ times, expect 429 near the end)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Run this single request 25 times in a row (Postman Runner, iteration count 25) in ISOLATION from the rest of the suite. The /auth/* limiter is a shared in-memory counter per IP (max 20 requests / 15 min), so mixing this with other auth tests in the same run will cause unrelated tests to fail with 429.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"ratelimit_probe@test.com\", \"password\": \"wrongpass\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Either rejected auth or rate limited', () => pm.expect(pm.response.code).to.be.oneOf([401, 429]));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:4000"
+    }
+  ]
+}
