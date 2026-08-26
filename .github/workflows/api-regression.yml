@@ -63,26 +63,7 @@ jobs:
 
       - name: Run API regression suite
         working-directory: postman
-        run: |
-          newman run Konekta_QA_Regression_Suite.postman_collection.json \
-            -e Konekta_Local.postman_environment.json \
-            --folder "01 - Auth" \
-            --folder "02 - Google OAuth" \
-            --folder "03 - Profile" \
-            --folder "04 - Discovery" \
-            --folder "05 - Offers" \
-            --folder "06 - Video (known bug BUG-001)" \
-            --folder "07 - Chat" \
-            --folder "08 - Notifications" \
-            --folder "09 - Dashboard" \
-            --folder "10 - Analytics" \
-            --folder "11 - Subscriptions" \
-            --folder "12 - Social" \
-            --folder "13 - Withdrawals" \
-            --folder "14 - Payment Methods" \
-            --folder "15 - System" \
-            --reporters cli,junit \
-            --reporter-junit-export newman-results.xml
+        run: newman run Konekta_QA_Regression_Suite.postman_collection.json -e Konekta_Local.postman_environment.json --folder "01 - Auth" --folder "02 - Google OAuth" --folder "03 - Profile" --folder "04 - Discovery" --folder "05 - Offers" --folder "06 - Video (BUG-001 fixed, nested under /offers/:id/videos)" --folder "07 - Chat" --folder "08 - Notifications" --folder "09 - Dashboard" --folder "10 - Analytics" --folder "11 - Subscriptions" --folder "12 - Social" --folder "13 - Withdrawals" --folder "14 - Payment Methods" --folder "15 - System" --reporters cli,junit --reporter-junit-export newman-results.xml
 
       - name: Upload test results
         if: always()
