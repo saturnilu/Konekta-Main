@@ -36,6 +36,7 @@ export const notificationController = {
       const id = Number(req.params.id);
       if (!Number.isFinite(id)) throw new ApiError(400, 'Invalid id');
       const r = await notificationService.markOneRead(req.user.id, id);
+      if (!r.updated) throw new ApiError(404, 'Notification not found');
       return ok(res, r, 'Marked as read');
     } catch (e) { next(e); }
   },

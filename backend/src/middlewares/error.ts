@@ -24,6 +24,10 @@ export function errorHandler(
     return res.status(err.status).json({ success: false, message: err.message });
   }
 
+  if (err instanceof SyntaxError && 'body' in err) {
+    return res.status(400).json({ success: false, message: 'Malformed JSON body' });
+  }
+
   const isProd = process.env.NODE_ENV === 'production';
   if (!isProd) {
     console.error('[unhandled]', err);

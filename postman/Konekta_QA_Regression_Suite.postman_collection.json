@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Konekta API \u2014 QA Regression Suite",
-    "description": "Automated regression suite for the Konekta backend (Express + TypeScript + MySQL). Built from Konekta_QA_Test_Case_Matrix.xlsx and Konekta_QA_Bug_Report.md. Requests tagged '[BUG-XXX regression]' intentionally assert the CORRECT expected behaviour and will fail until the corresponding bug is fixed \u2014 they exist to flip green automatically once a fix ships, without needing the suite rewritten.",
+    "description": "Automated regression suite for the Konekta backend (Express + TypeScript + MySQL). Built from Konekta_QA_Test_Case_Matrix.xlsx and Konekta_QA_Bug_Report.md. BUG-001 through BUG-004 have been fixed and this suite verifies the fixes; BUG-005 (subscriptions endpoint naming overlap) remains an open observation pending a product decision.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -2136,10 +2136,10 @@
       "description": ""
     },
     {
-      "name": "06 - Video (known bug BUG-001)",
+      "name": "06 - Video (BUG-001 fixed, nested under /offers/:id/videos)",
       "item": [
         {
-          "name": "[BUG-001 regression] GET /videos",
+          "name": "List video submissions for an offer",
           "request": {
             "method": "GET",
             "header": [
@@ -2149,15 +2149,17 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/videos",
+              "raw": "{{base_url}}/offers/1/videos",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
+                "offers",
+                "1",
                 "videos"
               ]
             },
-            "description": "Known bug: BUG-001. Video routes are never mounted in app.ts. This test documents the expected behaviour and will pass once the fix ships."
+            "description": ""
           },
           "response": [],
           "event": [
@@ -2166,16 +2168,14 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// This test intentionally asserts CORRECT behaviour.",
-                  "// It will FAIL until BUG-001 (video routes not mounted) is fixed.",
-                  "pm.test('Video routes should be reachable (BUG-001)', () => pm.response.to.have.status(200));"
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
                 ]
               }
             }
           ]
         },
         {
-          "name": "[BUG-001 regression] POST /videos",
+          "name": "Submit a video for an approved offer [captures video_id]",
           "request": {
             "method": "POST",
             "header": [
@@ -2189,18 +2189,20 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/videos",
+              "raw": "{{base_url}}/offers/1/videos",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
+                "offers",
+                "1",
                 "videos"
               ]
             },
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\"video_url\": \"https://tiktok.com/@test/video/123\", \"platform\": \"tiktok\"}"
+              "raw": "{\"video_url\": \"https://www.tiktok.com/@avacreator/video/999999\"}"
             }
           },
           "response": [],
@@ -2210,34 +2212,43 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Video submission should work (BUG-001)', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('video_id', pm.response.json().data.video_id);"
                 ]
               }
             }
           ]
         },
         {
-          "name": "[BUG-001 regression] POST /videos/:id/refresh",
+          "name": "Submit video without an approved application (negative)",
           "request": {
             "method": "POST",
             "header": [
               {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
                 "key": "Authorization",
-                "value": "Bearer {{token_influencer1}}"
+                "value": "Bearer {{token_influencer2}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/videos/1/refresh",
+              "raw": "{{base_url}}/offers/2/videos",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "videos",
-                "1",
-                "refresh"
+                "offers",
+                "2",
+                "videos"
               ]
             },
-            "description": ""
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"video_url\": \"https://www.tiktok.com/@leolifestyle/video/888888\"}"
+            }
           },
           "response": [],
           "event": [
@@ -2246,14 +2257,14 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Refresh should work (BUG-001)', () => pm.response.to.have.status(200));"
+                  "pm.test('Status is 403, no approved application', () => pm.response.to.have.status(403));"
                 ]
               }
             }
           ]
         },
         {
-          "name": "[BUG-001 regression] GET /videos/brand/:influencerId",
+          "name": "Brand views influencer's submissions for the offer",
           "request": {
             "method": "GET",
             "header": [
@@ -2263,11 +2274,13 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/videos/brand/1",
+              "raw": "{{base_url}}/offers/1/videos/brand/1",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
+                "offers",
+                "1",
                 "videos",
                 "brand",
                 "1"
@@ -2282,43 +2295,38 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Brand video list should work (BUG-001)', () => pm.response.to.have.status(200));"
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Includes influencer profile and reward', () => { const d = pm.response.json().data; pm.expect(d.influencer).to.exist; pm.expect(d.reward).to.be.a('number'); });"
                 ]
               }
             }
           ]
         },
         {
-          "name": "[BUG-001 regression] POST /videos/brand/:influencerId/pay",
+          "name": "Brand pays influencer for the offer [end-to-end payment check]",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
               {
                 "key": "Authorization",
                 "value": "Bearer {{token_brand1}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/videos/brand/1/pay",
+              "raw": "{{base_url}}/offers/1/videos/brand/1/pay",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
+                "offers",
+                "1",
                 "videos",
                 "brand",
                 "1",
                 "pay"
               ]
             },
-            "description": "",
-            "body": {
-              "mode": "raw",
-              "raw": "{\"amount\": 50000}"
-            }
+            "description": ""
           },
           "response": [],
           "event": [
@@ -2327,14 +2335,16 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Payment endpoint should work (BUG-001)', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+                  "// A second payment for the same offer/influencer pair correctly conflicts (409) \u2014",
+                  "// this endpoint is idempotent-safe. Accept either a fresh 200 or a 409 on repeat runs.",
+                  "pm.test('Either pays successfully or correctly blocks a duplicate payment', () => pm.expect(pm.response.code).to.be.oneOf([200, 409]));"
                 ]
               }
             }
           ]
         }
       ],
-      "description": "All requests here are expected to fail until BUG-001 (video routes not mounted) is fixed."
+      "description": "BUG-001 is fixed: the module is now mounted at /offers/:id/videos to match its mergeParams:true design, not a flat /videos path."
     },
     {
       "name": "07 - Chat",
@@ -2741,7 +2751,7 @@
           ]
         },
         {
-          "name": "[BUG-002 regression] IDOR - mark another user's notification as read",
+          "name": "Notification mark-as-read is correctly scoped to owner (BUG-002, fixed)",
           "request": {
             "method": "POST",
             "header": [
@@ -2761,7 +2771,7 @@
                 "read"
               ]
             },
-            "description": "Known bug: BUG-002. The endpoint returns 200 'Marked as read' even when the notification belongs to another user, even though the underlying update is correctly scoped and affects 0 rows. This test documents the expected behaviour."
+            "description": ""
           },
           "response": [],
           "event": [
@@ -2771,8 +2781,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "// Notification id 1 belongs to influencer1 (Ava), not influencer2 (Leo).",
-                  "// Correct behaviour is 404. Currently returns 200 due to BUG-002.",
-                  "pm.test('Should reject with 404 for non-owned resource (BUG-002)', () => pm.response.to.have.status(404));"
+                  "pm.test('Correctly rejects non-owned resource with 404', () => pm.response.to.have.status(404));"
                 ]
               }
             }
@@ -3279,7 +3288,7 @@
           ]
         },
         {
-          "name": "[BUG-003 regression] IDOR - delete another user's social account",
+          "name": "Social account delete is correctly scoped to owner (BUG-003, fixed)",
           "request": {
             "method": "DELETE",
             "header": [
@@ -3299,7 +3308,7 @@
                 "{{social_id}}"
               ]
             },
-            "description": "Known bug: BUG-003. The endpoint returns 200 'deleted:true' even when the social account belongs to another user. The SQL delete is correctly scoped and affects 0 rows, but the controller never checks affected-rows before reporting success. Same pattern as BUG-002."
+            "description": ""
           },
           "response": [],
           "event": [
@@ -3309,8 +3318,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "// This social account belongs to influencer1 (Ava), not influencer2 (Leo).",
-                  "// Correct behaviour is 404. Currently returns 200 'deleted:true' due to BUG-003.",
-                  "pm.test('Should reject with 404 for non-owned resource (BUG-003)', () => pm.response.to.have.status(404));"
+                  "pm.test('Correctly rejects non-owned resource with 404', () => pm.response.to.have.status(404));"
                 ]
               }
             }
@@ -3887,7 +3895,7 @@
           ]
         },
         {
-          "name": "[BUG-004 regression] Malformed JSON body",
+          "name": "Malformed JSON body returns 400, not 500 (BUG-004, fixed)",
           "request": {
             "method": "POST",
             "header": [
@@ -3905,7 +3913,7 @@
                 "health"
               ]
             },
-            "description": "Known bug: BUG-004. Body is deliberately malformed JSON syntax. Targets /health (not /auth/*) to avoid the shared auth rate limiter.",
+            "description": "Body is deliberately malformed JSON syntax. Targets /health (not /auth/*) to avoid the shared auth rate limiter.",
             "body": {
               "mode": "raw",
               "raw": "{bad json"
@@ -3920,9 +3928,7 @@
                 "exec": [
                   "// Uses /health instead of /auth/login on purpose, so this check",
                   "// is not affected by the /auth/* rate limiter shared with other tests.",
-                  "// Correct behaviour is 400 Bad Request for malformed client JSON.",
-                  "// Currently returns 500 due to BUG-004 (errorHandler doesn't catch SyntaxError).",
-                  "pm.test('Should return 400, not 500 (BUG-004)', () => pm.response.to.have.status(400));"
+                  "pm.test('Returns 400 for malformed JSON', () => pm.response.to.have.status(400));"
                 ]
               }
             }

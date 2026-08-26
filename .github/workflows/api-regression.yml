@@ -83,10 +83,6 @@ jobs:
             --folder "15 - System" \
             --reporters cli,junit \
             --reporter-junit-export newman-results.xml
-        # Note: folder "16 - Rate Limiting" is intentionally excluded from CI.
-        # It exhausts the shared /auth/* rate-limit budget (20 req / 15 min)
-        # and would cause unrelated auth tests to fail with 429 if run together.
-        # Run it manually / in isolation when specifically testing the limiter.
 
       - name: Upload test results
         if: always()

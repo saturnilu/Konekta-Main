@@ -326,6 +326,7 @@ export const videoController = {
         throw new ApiError(403, 'Only influencers');
       }
       const offerId = Number(req.params.id);
+      if (!Number.isFinite(offerId)) throw new ApiError(400, 'Invalid offer id');
 
       const [videos] = await pool.query<DbRow[]>(
         `SELECT id, video_url, views_count, likes_count, shares_count, fetched_at, created_at

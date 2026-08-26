@@ -70,6 +70,7 @@ app.use('/profile', profileRoutes);
 app.post('/profile/avatar', requireAuth, avatarUpload, avatarController.upload);
 app.use('/', discoveryRoutes);        
 app.use('/offers', offerRoutes);
+app.use('/offers/:id/videos', videoRoutes);
 app.use('/conversations', chatRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/dashboard', dashboardRoutes);
