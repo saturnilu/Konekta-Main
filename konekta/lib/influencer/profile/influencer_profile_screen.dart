@@ -159,7 +159,10 @@ class _InfluencerProfileScreenState extends State<InfluencerProfileScreen> {
     setState(() => _uploadingAvatar = true);
     final scope = AppScope.of(context);
     try {
-      await scope.run(() => scope.api.uploadFile('/profile/avatar', fieldName: 'avatar', filePath: picked!.path));
+      await scope.run(() async {
+        final bytes = await picked!.readAsBytes();
+        return scope.api.uploadFile('/profile/avatar', fieldName: 'avatar', bytes: bytes, filename: picked.name);
+      });
       await _load();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile photo updated')));

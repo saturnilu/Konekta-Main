@@ -150,15 +150,18 @@ class _BrandAnalyticsScreenState extends State<BrandAnalyticsScreen> {
         return Scaffold(
       backgroundColor: _kBg,
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () => context.read<BrandAnalyticsCubit>().load(),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.only(bottom: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(context),
+        child: Column(
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () => context.read<BrandAnalyticsCubit>().load(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                   child: Column(
@@ -195,8 +198,11 @@ class _BrandAnalyticsScreenState extends State<BrandAnalyticsScreen> {
                   ),
                 ),
               ],
+                  ),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
         );

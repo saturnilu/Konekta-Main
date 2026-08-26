@@ -51,36 +51,45 @@ class _BrandDashboardScreenState extends State<BrandDashboardScreen> {
       backgroundColor: backgroundColor,
       body: SafeArea(
         bottom: false,
-        child: RefreshIndicator(
-          onRefresh: () => context.read<BrandDashboardCubit>().load(),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.only(bottom: 110, top: 16),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          children: [
+            // Header — kept as a direct Column child (outside the scroll
+            // view below) so it stays fixed at the top instead of
+            // scrolling away with the rest of the dashboard content.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.hub_outlined, color: primaryBlue, size: 28),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Konekta',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: primaryBlue.withValues(alpha: 0.8),
-                            ),
-                          ),
-                        ],
+                      Icon(Icons.hub_outlined, color: primaryBlue, size: 28),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Konekta',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: primaryBlue.withValues(alpha: 0.8),
+                        ),
                       ),
-                      NotificationBellIcon(color: darkText, size: 26),
                     ],
                   ),
+                  NotificationBellIcon(color: darkText, size: 26),
+                ],
+              ),
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () => context.read<BrandDashboardCubit>().load(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 110, top: 16),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                   const SizedBox(height: 8),
                   Text(
                     'Hi, $firstName',
@@ -265,6 +274,9 @@ class _BrandDashboardScreenState extends State<BrandDashboardScreen> {
             ),
           ),
         ),
+              ),
+            ],
+          ),
       ),
     );
   }

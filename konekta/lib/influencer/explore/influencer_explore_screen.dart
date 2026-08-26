@@ -97,39 +97,39 @@ class _InfluencerExploreScreenState extends State<InfluencerExploreScreen> {
     final topPad = MediaQuery.of(context).padding.top;
     return Scaffold(
       backgroundColor: const Color(0xFFEDF4FC),
-      body: RefreshIndicator(
-        onRefresh: _load,
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Container(
-                padding: EdgeInsets.fromLTRB(16, topPad + 16, 16, 24),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF2FA2EE), Color(0xFF3B7CE5)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(28),
-                    bottomRight: Radius.circular(28),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.hub_outlined, color: Colors.white, size: 22),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Konekta',
-                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800),
-                    ),
-                    const Spacer(),
-                    const NotificationBellIcon(color: Colors.white, size: 24),
-                  ],
-                ),
+      body: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.fromLTRB(16, topPad + 16, 16, 24),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF2FA2EE), Color(0xFF3B7CE5)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(28),
+                bottomRight: Radius.circular(28),
               ),
             ),
-
+            child: Row(
+              children: [
+                const Icon(Icons.hub_outlined, color: Colors.white, size: 22),
+                const SizedBox(width: 8),
+                const Text(
+                  'Konekta',
+                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800),
+                ),
+                const Spacer(),
+                const NotificationBellIcon(color: Colors.white, size: 24),
+              ],
+            ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _load,
+              child: CustomScrollView(
+                slivers: [
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
@@ -316,6 +316,9 @@ class _InfluencerExploreScreenState extends State<InfluencerExploreScreen> {
               ),
           ],
         ),
+      ),
+          ),
+        ],
       ),
     );
   }

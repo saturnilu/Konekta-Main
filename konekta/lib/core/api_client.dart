@@ -65,12 +65,12 @@ class ApiClient {
     return _decode(res);
   }
 
-  Future<dynamic> uploadFile(String path, {required String fieldName, required String filePath}) async {
+  Future<dynamic> uploadFile(String path, {required String fieldName, required List<int> bytes, required String filename}) async {
     final request = http.MultipartRequest('POST', _u(path));
     if (session.token != null) {
       request.headers['Authorization'] = 'Bearer ${session.token}';
     }
-    request.files.add(await http.MultipartFile.fromPath(fieldName, filePath));
+    request.files.add(http.MultipartFile.fromBytes(fieldName, bytes, filename: filename));
     final streamed = await request.send().timeout(const Duration(seconds: 30));
     final res = await http.Response.fromStream(streamed);
     return _decode(res);

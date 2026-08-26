@@ -153,19 +153,10 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: RefreshIndicator(
                 onRefresh: () => _load(reset: true),
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (notification) {
-                    if (notification is ScrollUpdateNotification && _listCtrl.hasClients) {
-                      _listCtrl.jumpTo(_listCtrl.offset);
-                    }
-                    return false;
-                  },
-                  child: ListView(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    controller: _listCtrl,
-                    children: [
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  controller: _listCtrl,
+                  children: [
                       const SizedBox(height: 20),
                       // Premium Card
                       InkWell(
@@ -411,8 +402,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                       ],
                       const SizedBox(height: 30),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             ),

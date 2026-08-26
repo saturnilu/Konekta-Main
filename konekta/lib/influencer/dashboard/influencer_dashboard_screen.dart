@@ -74,38 +74,43 @@ class _InfluencerDashboardScreenState extends State<InfluencerDashboardScreen> {
         ),
         SafeArea(
           bottom: false,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.only(bottom: 110),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 7),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 7, 20, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: const [
+                        Icon(Icons.hub_outlined, color: Colors.white, size: 24),
+                        SizedBox(width: 6),
+                        Text(
+                          'Konekta',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const NotificationBellIcon(color: Colors.white, size: 24),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 110),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: const [
-                              Icon(Icons.hub_outlined, color: Colors.white, size: 24),
-                              SizedBox(width: 6),
-                              Text(
-                                'Konekta',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const NotificationBellIcon(color: Colors.white, size: 24),
-                        ],
-                      ),
                       const SizedBox(height: 20),
                       // Greeting
                       Text(
@@ -251,6 +256,9 @@ class _InfluencerDashboardScreenState extends State<InfluencerDashboardScreen> {
                 ),
               ],
             ),
+          ),
+              ),
+            ],
           ),
         ),
       ],
