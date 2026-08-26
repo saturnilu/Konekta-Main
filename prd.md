@@ -24,7 +24,7 @@ The primary goal is to streamline matching, application, progress tracking, comm
 
 1. Connect brands and influencers efficiently.
 2. Provide a relevant search and filter system for both sides.
-3. Help influencers monitor all their endorsements — and earnings — in one place.
+3. Help influencers monitor all their endorsements and earnings in one place.
 4. Help brands find influencers that fit their campaign needs and track spend.
 5. Improve collaboration transparency through clear status tracking and notifications.
 6. Give both sides a believable, testable monetization flow (subscriptions, payouts) ahead of a real payment gateway integration.
@@ -43,7 +43,7 @@ The primary goal is to streamline matching, application, progress tracking, comm
 - Difficulty finding the right influencer based on niche, audience, and budget.
 - No structured way to compare influencer candidates.
 - No visibility into true budget exposure across multiple campaigns with multiple creators each.
-- No saved payment method — re-entering payment info every time is friction (and there was no way to remove a saved one, which this product intentionally supports from the start).
+- No saved payment method, so re-entering payment info every time is friction (and there was no way to remove a saved one, which this product intentionally supports from the start).
 
 ---
 
@@ -77,16 +77,16 @@ SMEs, local brands, startups, marketing/talent agencies, enterprise brands runni
 
 ### 6.1 Implemented (beyond the original MVP list)
 
-The original MVP scope excluded payment/monetization entirely. That's since changed — the following are implemented, with the explicit caveat that **no real payment gateway is connected**:
+The original MVP scope excluded payment/monetization entirely. That's since changed, and the following are implemented, with the explicit caveat that **no real payment gateway is connected**:
 
 - Brand subscription plans (Free / Starter / Pro / Enterprise) and influencer plans (Free / Pro Creator)
-- A dummy QRIS-style checkout (on-device generated QR, no real transaction) for every "payment" — subscribing and paying an influencer both go through it
+- A dummy QRIS-style checkout (on-device generated QR, no real transaction) for every "payment", and subscribing and paying an influencer both go through it
 - Downloadable PDF invoices for subscription payments
-- Subscription lock: a paid plan cannot be downgraded before its period ends; it lazily auto-expires back to Free on the next read after that
-- Influencer earnings balance + self-service withdrawal requests (manually processed — see §6.3)
+- Subscription lock: a paid plan cannot be downgraded before its period ends, and it lazily auto-expires back to Free on the next read after that
+- Influencer earnings balance + self-service withdrawal requests (manually processed, see §6.3)
 - Brand-saved payment methods (label + last 4 digits only, removable)
 - Rich per-role analytics: view/engagement trends, budget vs. committed spend, application funnel, paginated transaction history
-- Video submission accepts **TikTok or Instagram Reel** links — the platform is auto-detected from the URL, so an influencer never has to specify which one they're submitting (see §6.4 for a caveat on Instagram's data source)
+- Video submission accepts **TikTok or Instagram Reel** links, and the platform is auto-detected from the URL, so an influencer never has to specify which one they're submitting (see §6.4 for a caveat on Instagram's data source)
 
 ### 6.2 Original MVP Scope (still the core loop)
 
@@ -103,9 +103,9 @@ The original MVP scope excluded payment/monetization entirely. That's since chan
 
 ### 6.3 Explicitly Out of Scope (for now)
 
-- **A real payment gateway.** Midtrans/Xendit/DOKU integration is the clear next step — see `ARCHITECTURE.md` §7 for exactly what changes.
+- **A real payment gateway.** Midtrans/Xendit/DOKU integration is the clear next step, see `ARCHITECTURE.md` §7 for exactly what changes.
 - **Real email delivery.** Password reset currently logs the token server-side (and echoes it in non-production API responses) rather than sending an email.
-- **Automated withdrawal processing.** A withdrawal request needs a human to flip its status in the database; there's no admin UI or disbursement API call yet.
+- **Automated withdrawal processing.** A withdrawal request needs a human to flip its status in the database, and there's no admin UI or disbursement API call yet.
 - AI recommendation engine
 - Full KYC / identity verification
 - Multi-team management for brands
@@ -113,14 +113,14 @@ The original MVP scope excluded payment/monetization entirely. That's since chan
 
 ### 6.4 Known Caveat: Instagram Reels Field Mapping
 
-TikTok stat fetching (views/likes/shares) is verified end-to-end against a live RapidAPI subscription. Instagram's field mapping (views/likes/comments/shares) is based on a real sample response captured during development, but the exact RapidAPI endpoint path and parameter name for looking up **one specific Reel by URL** haven't been confirmed against a chosen product's docs yet — see the comment above `fetchInstagramStats()` in `backend/src/services/instagram.service.ts`. Submitting an Instagram Reel link works today (the platform is correctly detected and stored), but the stats returned may read as 0 or throw a clear "not configured yet" error until `RAPIDAPI_INSTAGRAM_HOST` is set to a verified product.
+TikTok stat fetching (views/likes/shares) is verified end-to-end against a live RapidAPI subscription. Instagram's field mapping (views/likes/comments/shares) is based on a real sample response captured during development, but the exact RapidAPI endpoint path and parameter name for looking up **one specific Reel by URL** haven't been confirmed against a chosen product's docs yet, so see the comment above `fetchInstagramStats()` in `backend/src/services/instagram.service.ts`. Submitting an Instagram Reel link works today (the platform is correctly detected and stored), but the stats returned may read as 0 or throw a clear "not configured yet" error until `RAPIDAPI_INSTAGRAM_HOST` is set to a verified product.
 
 ---
 
 ## 7. User Roles
 
 ### 7.1 Influencer
-- Create personal and social media profiles; upload an avatar
+- Create personal and social media profiles and upload an avatar
 - Display niche, rate card, audience, and media kit
 - Apply to campaigns, submit video deliverables
 - Track endorsement status and progress toward a campaign's view/like targets
@@ -129,7 +129,7 @@ TikTok stat fetching (views/likes/shares) is verified end-to-end against a live 
 - Subscribe to Pro for a verified badge, featured placement, and full analytics history
 
 ### 7.2 Brand
-- Create brand/company profile; upload a logo
+- Create brand/company profile and upload a logo
 - Search for influencers based on campaign needs
 - Create campaigns (budget, target views/likes, max creators, deadline)
 - Review and approve/reject applicants
@@ -138,7 +138,7 @@ TikTok stat fetching (views/likes/shares) is verified end-to-end against a live 
 - Subscribe to a paid plan for higher campaign limits
 
 ### 7.3 Admin (not yet built)
-- User/content moderation, account verification, report handling, withdrawal processing — all currently require direct database access instead of a UI.
+- User/content moderation, account verification, report handling, withdrawal processing, and all currently require direct database access instead of a UI.
 
 ---
 
@@ -159,7 +159,7 @@ TikTok stat fetching (views/likes/shares) is verified end-to-end against a live 
 2. Complete brand profile and create a campaign.
 3. Review applicants, approve the ones that fit.
 4. Monitor each approved creator's progress toward the campaign target.
-5. Pay a creator once satisfied (via the dummy checkout — sees the creator's saved bank details if they've added one).
+5. Pay a creator once satisfied (via the dummy checkout, and sees the creator's saved bank details if they've added one).
 6. Track spend and campaign counts on the analytics dashboard.
 7. Optionally subscribe to a higher plan for more concurrent campaigns.
 
@@ -178,17 +178,17 @@ Brand: name, logo, description, industry, location, website, plan.
 Brand → influencer search by niche/location/platform/followers/engagement (Pro-tier influencers surface first). Influencer → brand search by industry/location.
 
 ### 9.4 Campaign Management
-Create → apply → approve/reject → submit video (TikTok or Instagram Reel, auto-detected from the URL) → auto-tracked progress → paid. Campaign status: `open` → `in_progress` → `completed` (a campaign can stay `in_progress` with multiple creators at different individual stages simultaneously — an individual applicant being paid doesn't force the whole campaign to `completed`).
+Create → apply → approve/reject → submit video (TikTok or Instagram Reel, auto-detected from the URL) → auto-tracked progress → paid. Campaign status: `open` → `in_progress` → `completed` (a campaign can stay `in_progress` with multiple creators at different individual stages simultaneously, and an individual applicant being paid doesn't force the whole campaign to `completed`).
 
 ### 9.5 Messaging
-1:1 chat, tied to a campaign relationship or started directly from a profile. Push-style delivery isn't implemented — the client polls/refreshes.
+1:1 chat, tied to a campaign relationship or started directly from a profile. Push-style delivery isn't implemented, and the client polls/refreshes instead.
 
 ### 9.6 Dashboards & Analytics
 Influencer: earnings this month/pending, active/completed campaigns, view/engagement trend (7 days on Free, up to 365 on Pro), recent transaction list.
 Brand: open/active/completed campaign counts, total budget (accounting for `max_creators`), committed spend (reward × currently-approved creators), reach/engagement trend, paginated payment history.
 
 ### 9.7 Notifications
-New applicant, application approved/rejected, new message, subscription activated, withdrawal requested — each pushed inline by the service that causes it, surfaced via an unread-count badge on the bell icon.
+New applicant, application approved/rejected, new message, subscription activated, withdrawal requested, each pushed inline by the service that causes it, surfaced via an unread-count badge on the bell icon.
 
 ### 9.8 Monetization (simulated)
 Subscriptions (both roles), a dummy checkout with a downloadable invoice, influencer withdrawal requests, and brand-saved payment methods.
@@ -197,14 +197,14 @@ Subscriptions (both roles), a dummy checkout with a downloadable invoice, influe
 
 ## 10. Functional Requirements
 
-- Users register with email + password or Google; the system stores their role.
+- Users register with email + password or Google, and the system stores their role.
 - Users can update their profile, including uploading a photo.
 - Influencers can add/remove multiple social media accounts (upserted, not duplicated, on re-add).
 - Brands create campaigns with a budget, per-creator reward, target metrics, and an optional creator cap.
-- Influencers apply; brands approve/reject; all status changes persist and notify the other party.
-- Campaign progress is computed from real submitted-video view/like counts against the campaign's stated targets — not from headcount.
-- Users can chat once a conversation exists; messages persist and are retrievable.
-- A brand cannot downgrade a paid subscription before it expires; it auto-reverts to Free on the next status check after expiry.
+- Influencers apply, brands approve or reject, and all status changes persist and notify the other party.
+- Campaign progress is computed from real submitted-video view/like counts against the campaign's stated targets, not from headcount.
+- Users can chat once a conversation exists, and messages persist and are retrievable.
+- A brand cannot downgrade a paid subscription before it expires, and it auto-reverts to Free on the next status check after expiry.
 - An influencer cannot withdraw more than their real earned-minus-already-withdrawn balance.
 
 ---
@@ -212,16 +212,16 @@ Subscriptions (both roles), a dummy checkout with a downloadable invoice, influe
 ## 11. Non-Functional Requirements
 
 - **Performance:** search and dashboard queries should return quickly even as campaign/applicant counts grow.
-- **Security:** passwords hashed with bcrypt; JWT-protected endpoints; payment methods store display info only, never raw card data.
-- **Reliability:** campaign, application, and payment-record data must not be lost; notification failures must never block the action that triggered them.
-- **Usability:** simple, mobile-first UI; a single consistent color palette (`KonektaColors` — see `design-patterns.md`).
-- **Maintainability:** layered backend (routes/controllers/services), repository + Cubit-based Flutter state management — see `ARCHITECTURE.md`.
+- **Security:** passwords hashed with bcrypt, JWT-protected endpoints, and payment methods that store display info only, never raw card data.
+- **Reliability:** campaign, application, and payment-record data must not be lost, and notification failures must never block the action that triggered them.
+- **Usability:** simple, mobile-first UI, and a single consistent color palette (`KonektaColors`, see `design-patterns.md`).
+- **Maintainability:** layered backend (routes/controllers/services), repository + Cubit-based Flutter state management, see `ARCHITECTURE.md`.
 
 ---
 
 ## 12. Data Entities (High Level)
 
-See `ARCHITECTURE.md` §5 for the full, current schema — the highlights that changed since the original MVP entity list:
+See `ARCHITECTURE.md` §5 for the full, current schema, and here are the highlights that changed since the original MVP entity list:
 
 - `influencer_profiles` gained `plan`, `plan_expires_at`, `payout_bank`, `payout_account`.
 - `brand_profiles` gained `plan`.
@@ -244,22 +244,22 @@ See `ARCHITECTURE.md` §5 for the full, current schema — the highlights that c
 2. Low chat activity → offers stall before becoming campaigns.
 3. No identity verification yet → risk of fake accounts.
 4. Cold start problem → hard to reach critical mass on both sides at once.
-5. **The payment simulation must not be mistaken for a real one** — every checkout screen carries an explicit "demo mode" label for this reason, and it should stay that way until a real gateway is wired in.
+5. **The payment simulation must not be mistaken for a real one**, so every checkout screen carries an explicit "demo mode" label for this reason, and it should stay that way until a real gateway is wired in.
 
 ---
 
 ## 15. Recommended Development Phases
 
-### Phase 1 — MVP (done)
+### Phase 1 (MVP, done)
 Auth, profile, search, offers, tracking, chat, dashboards.
 
-### Phase 2 — Monetization scaffolding (done, simulated)
+### Phase 2 (Monetization scaffolding, done and simulated)
 Subscriptions with lazy expiry, dummy checkout + invoices, withdrawal requests, saved payment methods, notification badge, richer analytics.
 
-### Phase 3 — Multi-platform video + state management overhaul (done)
-Instagram Reels support alongside TikTok (platform auto-detected from the URL, see §6.4 for the one open caveat); migrated most of the Flutter app from plain `setState` to `flutter_bloc` (Cubit) — see `ARCHITECTURE.md` §4.1b and `design-patterns.md` for the full breakdown of which screens got a shared Cubit, which got a screen-scoped one, and which were deliberately left alone.
+### Phase 3 (Multi-platform video + state management overhaul, done)
+Instagram Reels support alongside TikTok (platform auto-detected from the URL, see §6.4 for the one open caveat), and migrated most of the Flutter app from plain `setState` to `flutter_bloc` (Cubit), see `ARCHITECTURE.md` §4.1b and `design-patterns.md` for the full breakdown of which screens got a shared Cubit, which got a screen-scoped one, and which were deliberately left alone.
 
-### Phase 4 — Real integrations (next)
+### Phase 4 (Real integrations, next)
 - Real payment gateway (Midtrans/Xendit/DOKU) replacing every dummy checkout screen.
 - Real email delivery for password reset.
 - Confirm the exact Instagram RapidAPI endpoint/field mapping against a subscribed product (§6.4).
@@ -277,11 +277,12 @@ The product today satisfies:
 - Brands can search for influencers and vice versa.
 - Campaigns can be created, applied to, approved/rejected, and tracked to completion with real performance data from TikTok or Instagram Reels.
 - Chat and notifications work end-to-end.
-- Subscriptions, invoices, withdrawals, and saved payment methods work end-to-end **as a simulation** — no real money moves yet.
+- Subscriptions, invoices, withdrawals, and saved payment methods work end-to-end **as a simulation**, and no real money moves yet.
 - All of the above is stored securely in MySQL/MariaDB behind a JWT-authenticated API.
+- The full stack runs as a **public, shareable live demo** (backend + database on Railway, Flutter Web build on Vercel), see `README.md`'s Deployment section and `ARCHITECTURE.md` §9 for how it's wired up, including the desktop "phone frame" presentation so a shared link looks like a phone screen rather than a stretched website.
 
 ---
 
 ## 17. Summary
 
-Konekta connects influencers and brands around **discovery, campaign management, chat, and now a full (simulated) monetization loop** — subscriptions, payments, and payouts. The immediate next milestone is swapping the dummy checkout screens for a real payment gateway without needing to change any of the surrounding product flow, since every seam for that swap is already isolated and documented in `ARCHITECTURE.md` §7.
+Konekta connects influencers and brands around **discovery, campaign management, chat, and now a full (simulated) monetization loop**, including subscriptions, payments, and payouts. The immediate next milestone is swapping the dummy checkout screens for a real payment gateway without needing to change any of the surrounding product flow, since every seam for that swap is already isolated and documented in `ARCHITECTURE.md` §7.
