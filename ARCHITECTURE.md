@@ -10,7 +10,7 @@ Konekta is a two-sided mobile platform connecting **influencers** and **brands**
 | **Backend** | Express.js (TypeScript) |
 | **Database** | MySQL 8.x / MariaDB 10.x |
 
-This document describes the architecture **as actually implemented in the codebase**, not an aspirational design. If you're comparing this against an earlier draft that mentioned BLoC/Cubit, a `features/` folder with `data/domain/presentation` layers, or design patterns like Builder/Adapter/Facade/Observer/State: those described a parallel scaffold (`backend/src/modules/*` and a planned Flutter structure) that was never wired into the running app and has since been removed as dead code. What's below matches what's actually imported and executed.
+This document describes the architecture **as actually implemented in the codebase**, not an aspirational design. If you're comparing this against an earlier draft that mentioned BLoC/Cubit, a `features/` folder with `data/domain/presentation` layers, or design patterns like Builder/Adapter/Facade/Observer/State: those described a parallel scaffold (`backend/src/modules/*` and `backend/src/core/*`, plus a planned Flutter structure) that was never wired into the running app. `app.ts` only ever imported from the flat `middlewares/`, `utils/`, `controllers/`, `services/`, and `routes/` folders below, so `modules/` and `core/` sat alongside the real app as unreferenced dead code. They've now been deleted outright so the folder tree matches what's actually imported and executed, rather than just relying on a doc to say so.
 
 ---
 
@@ -51,7 +51,9 @@ backend/src/
 └── routes/                     # Router() per feature, mounted in app.ts
 ```
 
-There is no `modules/` folder with `campaignBuilder.ts` / `eventBus.ts` / `socialMediaFacade.ts` in the live app, and an earlier iteration of the project had that scaffold, but `app.ts` never imported it, so it was deleted. Everything the app actually does lives in the flat `controllers/services/routes` triplets above.
+There is no `modules/` or `core/` folder in the live app. An earlier iteration of the project had that scaffold (`campaignBuilder.ts` / `eventBus.ts` / `socialMediaFacade.ts` under `modules/`, plus a second copy of the auth middleware, error handler, and `ApiError` class under `core/`), but `app.ts` and every file it actually pulls in only ever imported from the flat structure above, so both folders were pure dead code and have been deleted. Everything the app actually does lives in the flat `controllers/services/routes` triplets above.
+
+**Why this is called out explicitly:** the `core/` copy wasn't just inert, it was a trap. It re-implemented `requireAuth`, `errorHandler`, and `ApiError` closely enough to look interchangeable with the real versions in `middlewares/`/`utils/`, down to matching export names. Code written against `core/`'s versions (imports, or tests asserting on `instanceof ApiError`) would type-check and even run, but would silently be checking against a class or function the live app never touches, since the two `ApiError` classes aren't the same identity at runtime. This is exactly the kind of thing worth a fresh grep for (`grep -rn "from '.*core/"` from `backend/src`) after any large refactor, before assuming a stray import is harmless.
 
 ### 3.2 Request Flow
 

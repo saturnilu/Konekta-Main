@@ -14,6 +14,8 @@ konekta-main/
 └── README.md
 ```
 
+> **QA, testing, and architecture:** for the API regression suite (Postman/Newman/CI), load testing (k6), unit tests (Jest), and the full bug report, see [`README-QA.md`](./README-QA.md) and [`bug_report.md`](./bug_report.md). For a deeper look at backend structure and design decisions, see [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+
 ---
 
 ## Tech Stack

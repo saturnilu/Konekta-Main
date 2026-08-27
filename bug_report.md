@@ -14,10 +14,10 @@
 |---|---|---|
 | Critical (P0) | 1 | Fixed |
 | Medium (P2) | 3 | Fixed |
-| Low (P3) | 2 | Fixed |
-| **Total bugs found** | **6** | **6 of 6 fixed** |
+| Low (P3) | 3 | Fixed |
+| **Total bugs found** | **7** | **7 of 7 fixed** |
 
-No data-integrity or authorization breaches turned up during testing. Every IDOR, role-gate, and financial-boundary test attempted was blocked correctly at the database level, even before any fixes. The critical bug (BUG-001) turned out to have two layers: a missing route mount, and underneath it, a mount-path mismatch that would have caused every video endpoint to crash even after adding the mount naively. Both layers are now fixed and verified with an end-to-end submission-to-payment test. BUG-002 and BUG-003 shared the same root pattern (a mutating endpoint that scoped its query correctly but reported success without checking whether the query actually matched a row) and were fixed the same way. BUG-005 turned out to be a genuinely dead, unused endpoint once checked against the actual Flutter codebase, and was removed cleanly.
+No data-integrity or authorization breaches turned up during testing. Every IDOR, role-gate, and financial-boundary test attempted was blocked correctly at the database level, even before any fixes. The critical bug (BUG-001) turned out to have two layers: a missing route mount, and underneath it, a mount-path mismatch that would have caused every video endpoint to crash even after adding the mount naively. Both layers are now fixed and verified with an end-to-end submission-to-payment test. BUG-002 and BUG-003 shared the same root pattern (a mutating endpoint that scoped its query correctly but reported success without checking whether the query actually matched a row) and were fixed the same way. BUG-005 turned out to be a genuinely dead, unused endpoint once checked against the actual Flutter codebase, and was removed cleanly. BUG-007 surfaced later, while adding a Jest unit test suite on top of this engagement's findings: a second, unwired copy of the auth middleware, error handler, and `ApiError` class under `src/core/` had been sitting alongside the real ones since an earlier scaffold, closely enough named to look interchangeable.
 
 ---
 
@@ -376,6 +376,36 @@ was confirmed as an intentional product decision, not something this bug
 touches. This bug is narrowly about incidental field-level exposure within
 data that's already meant to be public, not about whether that data should be
 public in the first place.
+
+---
+
+## BUG-007 — A second, unwired copy of the auth middleware, error handler, and `ApiError` class under `src/core/`
+
+**Severity:** Low (P3), a code-quality and repo-hygiene issue
+**Module:** Whole-codebase (`core/middlewares/auth.ts`, `core/middlewares/error.ts`, `core/utils/apiError.ts`, plus a `core/utils/asyncHandler.ts` and `core/utils/response.ts` alongside a whole unused `modules/` tree)
+**Status:** Fixed during this engagement
+
+**Description**
+Alongside the live `src/middlewares/`, `src/utils/`, `src/controllers/`, `src/services/`, and `src/routes/` folders that `app.ts` actually wires up, the repo also contained `src/core/` and `src/modules/`: a second, near-identical implementation of `requireAuth`, `errorHandler`, and `ApiError`, plus a set of unused feature modules (`modules/auth`, `modules/offers`, `modules/profile`, `modules/subscription`) that only imported from each other and from `core/`. A grep across every file `app.ts` actually pulls in (`routes/`, `controllers/`, `services/`, `middlewares/`, `utils/`, `config/`) confirmed neither `modules/` nor `core/` was reachable from the running app at all.
+
+This wasn't found through black-box API testing, since nothing about it is observable over HTTP, it only ever affected the code, not any request/response behavior. It surfaced while adding a Jest unit-test suite on top of this engagement's findings: a test written against `errorHandler` and `ApiError` (regression coverage for BUG-004) initially imported both from `core/`, which type-checked cleanly and ran without error, but exercised code the live server never touches. The test failed not because the fix was wrong, but because it was silently checking the wrong implementation.
+
+**Why this matters more than "some extra files"**
+The `core/` versions weren't placeholder stubs, they were fully working, exported under the exact same names (`requireAuth`, `errorHandler`, `ApiError`, `signToken`, `AuthPayload`) as their `middlewares/`/`utils/` counterparts. That makes them interchangeable at the type level but not at the runtime level: `core/utils/apiError.ts`'s `ApiError` and `utils/apiError.ts`'s `ApiError` are two distinct classes, so `instanceof ApiError` checks, `errorHandler`'s branching, and any test assertions all silently diverge depending on which copy a given import statement happens to resolve to. `core/middlewares/error.ts` in particular was missing the BUG-004 fix (the `SyntaxError` branch and the detailed per-field Zod message) that had already shipped in the real `middlewares/error.ts`, so anything accidentally wired against the `core/` copy would have looked like BUG-004 regressing, without the actual live endpoint ever being affected.
+
+**Root cause**
+An earlier iteration of the backend used a `modules/` + `core/` scaffold (mentioned as a "parallel scaffold" note already in `ARCHITECTURE.md`), which was superseded by the current flat `controllers/services/routes` structure but never physically deleted from the repo, so it sat alongside the live code, fully functional and fully unreferenced.
+
+**Verification**
+```bash
+# from backend/src, confirmed zero hits before deletion:
+grep -rln "from '.*modules/\|from '.*core/" routes controllers services middlewares utils config
+grep -n "modules/\|core/" app.ts
+```
+Both came back empty, confirming nothing in the live import graph touched either folder. `src/modules/` and `src/core/` were deleted outright rather than left as unreferenced dead code. `npx tsc --noEmit`, the full Jest suite (31/31), and `npx eslint src` were all re-run after deletion: TypeScript compiled clean, every test still passed, and ESLint's warning count dropped from 22 to 12 (the remainder were pre-existing warnings in live files, unrelated to this deletion).
+
+**Impact**
+No production impact: the live server never imported either folder, so no request path was ever at risk. The impact was entirely internal to development, specifically the risk of a future contributor (or a QA engineer writing tests, as happened here) importing from the wrong copy and getting misleading results that look like a real regression.
 
 ---
 
