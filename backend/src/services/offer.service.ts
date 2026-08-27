@@ -52,7 +52,12 @@ export const offerService = {
 
   async getById(id: number) {
     const [rows] = await pool.query<DbRow[]>(
-      `SELECT o.*, bp.brand_name, u.name AS brand_contact_name, u.avatar_url AS brand_avatar,
+      `SELECT o.id, o.brand_user_id, o.influencer_user_id, o.title, o.brief,
+              o.budget, o.reward_per_creator, o.target_views, o.target_likes,
+              o.target_shares, o.deliverables, o.requirements, o.target_audience,
+              o.deadline, o.max_creators, o.status, o.is_public,
+              o.created_at, o.updated_at,
+              bp.brand_name, u.name AS brand_contact_name, u.avatar_url AS brand_avatar,
               (SELECT COUNT(*) FROM campaign_applicants ca WHERE ca.offer_id = o.id) AS applicants_count
          FROM offers o
          JOIN brand_profiles bp ON bp.user_id = o.brand_user_id
