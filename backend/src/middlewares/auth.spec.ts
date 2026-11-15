@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { requireAuth, requireRole, signToken, AuthPayload } from '../core/middlewares/auth';
+import { requireAuth, requireRole, signToken, AuthPayload } from './auth';
 import { env } from '../config/env';
-import { ApiError } from '../core/utils/apiError';
+import { ApiError } from '../utils/apiError';
 
 function mockReq(headers: Record<string, string> = {}): Request {
   return { headers, user: undefined } as unknown as Request;
